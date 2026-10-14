@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strumenti Utili per IE11</title>
+    <style>
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            background-color: #eef2f7;
+            color: #2b2b2b;
+            margin: 0;
+            padding: 20px;
+        }
+        .wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .header {
+            background-color: #0078d4;
+            color: white;
+            padding: 20px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .grid-row {
+            margin-bottom: 20px;
+        }
+        .card {
+            background: #ffffff;
+            padding: 20px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        h2 {
+            margin-top: 0;
+            color: #0078d4;
+            border-bottom: 2px solid #0078d4;
+            padding-bottom: 5px;
+        }
+        input[type="text"], textarea, select {
+            width: 95%;
+            padding: 8px;
+            margin: 8px 0;
+            border: 1px solid #a6a6a6;
+            font-size: 14px;
+        }
+        button {
+            background-color: #0078d4;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #005a9e;
+        }
+        .orologio-box {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            padding: 10px;
+            background: #201f1e;
+            color: #00ff00;
+            font-family: monospace;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <div class="header">
+        <h1>Centro Utility Leggere</h1>
+        <p>Compatibile al 100% con Windows 7 e Internet Explorer 11</p>
+    </div>
+
+    <!-- OROLOGIO E TIMER -->
+    <div class="card">
+        <h2>⏱️ Tempo & Produttività</h2>
+        <div class="orologio-box" id="orologio">00:00:00</div>
+        <p><strong>Timer Studio (25 Minuti):</strong></p>
+        <button id="btnTimer">Avvia Timer</button>
+        <span id="timerOutput" style="margin-left:15px; font-weight:bold;">25:00</span>
+    </div>
+
+    <!-- CONVERTITORE -->
+    <div class="card">
+        <h2>⚖️ Convertitore di Unità (Celsius / Fahrenheit)</h2>
+        <label>Gradi Celsius:</label><br>
+        <input type="text" id="inputCelsius" value="0"><br>
+        <button id="btnConverti">Converti in Fahrenheit</button>
+        <p id="risultatoMeteo" style="font-weight:bold;"></p>
+    </div>
+
+    <!-- BLOCCO NOTE LOCALE -->
+    <div class="card">
+        <h2>📝 Blocco Note Rapido (Salva sul PC)</h2>
+        <p>Il testo rimane salvato nel browser anche se chiudi la pagina.</p>
+        <textarea id="bloccoNote" rows="6" placeholder="Scrivi qui i tuoi appunti..."></textarea><br>
+        <button id="btnSalvaNote">Salva Appunti</button>
+        <span id="statoNota" style="color: green; margin-left: 10px;"></span>
+    </div>
+</div>
+
+<script type="text/javascript">
+    // --- 1. GESTIONE OROLOGIO ---
+    function aggiornaOrologio() {
+        var ora = new Date();
+        var h = ora.getHours();
+        var m = ora.getMinutes();
+        var s = ora.getSeconds();
+        if (h < 10) h = "0" + h;
+        if (m < 10) m = "0" + m;
+        if (s < 10) s = "0" + s;
+        document.getElementById("orologio").innerHTML = h + ":" + m + ":" + s;
+    }
+    setInterval(aggiornaOrologio, 1000);
+    aggiornaOrologio();
+
+    // --- 2. GESTIONE TIMER POMODORO ---
+    var countdown;
+    var timerAttivo = false;
+    var btnTimer = document.getElementById("btnTimer");
+    var timerOutput = document.getElementById("timerOutput");
+
+    btnTimer.addEventListener("click", function() {
+        if (timerAttivo) {
+            clearInterval(countdown);
+            timerOutput.innerHTML = "25:00";
+            btnTimer.innerHTML = "Avvia Timer";
+            timerAttivo = false;
+        } else {
+            var durata = 25 * 60; // 25 minuti in secondi
+            timerAttivo = true;
+            btnTimer.innerHTML = "Resetta";
+            
+            countdown = setInterval(function() {
+                var minuti = Math.floor(durata / 60);
+                var secondi = durata % 60;
+                if (minuti < 10) minuti = "0" + minuti;
+                if (secondi < 10) secondi = "0" + secondi;
+                
+                timerOutput.innerHTML = minuti + ":" + secondi;
+                
+                if (durata <= 0) {
+                    clearInterval(countdown);
+                    timerOutput.innerHTML = "Tempo Scaduto!";
+                    alert("Pausa! Ottimo lavoro.");
+                    btnTimer.innerHTML = "Avvia Timer";
+                    timerAttivo = false;
+                }
+                durata--;
+            }, 1000);
+        }
+    });
+
+    // --- 3. CONVERTITORE DI UNITA ---
+    var btnConverti = document.getElementById("btnConverti");
+    btnConverti.addEventListener("click", function() {
+        var celsius = parseFloat(document.getElementById("inputCelsius").value);
+        if (isNaN(celsius)) {
+            document.getElementById("risultatoMeteo").innerHTML = "Inserisci un numero valido.";
+        } else {
+            var fahrenheit = (celsius * 9/5) + 32;
+            document.getElementById("risultatoMeteo").innerHTML = celsius + " °C corrispondono a " + fahrenheit.toFixed(1) + " °F";
+        }
+    });
+
+    // --- 4. BLOCCO NOTE CON LOCALSTORAGE (Compatibile IE11) ---
+    var bloccoNote = document.getElementById("bloccoNote");
+    var btnSalvaNote = document.getElementById("btnSalvaNote");
+    var statoNota = document.getElementById("statoNota");
+
+    // Carica la nota salvata all'avvio
+    if (window.localStorage) {
+        var notaSalvata = localStorage.getItem("nota_ie11");
+        if (notaSalvata) {
+            bloccoNote.value = notaSalvata;
+        }
+    }
+
+    btnSalvaNote.addEventListener("click", function() {
+        if (window.localStorage) {
+            localStorage.setItem("nota_ie11", bloccoNote.value);
+            statoNota.innerHTML = "Salva!";
+            setTimeout(function() {
+                statoNota.innerHTML = "";
+            }, 2000);
+        } else {
+            alert("LocalStorage non supportato su questo browser.");
+        }
+    });
+</script>
+
+</body>
+</html>
